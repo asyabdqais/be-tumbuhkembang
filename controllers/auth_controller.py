@@ -135,8 +135,8 @@ def refresh_token(request: Request, response: Response, db: Session = Depends(ge
 @router.post("/logout")
 def logout(response: Response):
     """Logout dengan menghapus HttpOnly cookies."""
-    response.delete_cookie(key="access_token")
-    response.delete_cookie(key="refresh_token")
+    response.delete_cookie(key="access_token", httponly=True, samesite="none", secure=True)
+    response.delete_cookie(key="refresh_token", httponly=True, samesite="none", secure=True)
     return {"message": "Logout sukses"}
 
 
