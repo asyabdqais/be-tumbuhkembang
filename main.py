@@ -49,21 +49,24 @@ async def custom_swagger_ui_html():
     body = body.replace("</head>", f"{custom_css}</head>")
     return HTMLResponse(body)
 
-# CORS — hanya origin frontend proyek (dev: 5173, production docker: 3000)
+# CORS — origin frontend (dev + production)
 DEFAULT_CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-   
+    "https://tumbangid.vercel.app",
 ]
 
 cors_origins_env = os.getenv("CORS_ORIGINS")
-allow_origins = (
-    [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-    if cors_origins_env
-    else DEFAULT_CORS_ORIGINS
-)
+if cors_origins_env:
+    extra_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+    # Gabungkan default + env, hilangkan duplikat
+    allow_origins = list(set(DEFAULT_CORS_ORIGINS + extra_origins))
+else:
+    allow_origins = DEFAULT_CORS_ORIGINS
+
+print(f"🌐 CORS allowed origins: {allow_origins}")
 
 app.add_middleware(
     CORSMiddleware,
