@@ -19,7 +19,10 @@ def seed_admin():
         # Cek apakah user admin sudah ada
         admin_exist = db.query(User).filter(User.username == admin_username).first()
         if admin_exist:
-            print(f"User admin '{admin_username}' sudah ada di database.")
+            # Update password admin yang sudah ada
+            admin_exist.password = hash_password(admin_password)
+            db.commit()
+            print(f"✅ Berhasil memperbarui password untuk user admin '{admin_username}'")
             return
 
         # Buat user admin baru
@@ -30,7 +33,7 @@ def seed_admin():
         )
         db.add(admin_user)
         db.commit()
-        print(f"✅ Berhasil membuat user admin: {admin_username}")
+        print(f"✅ Berhasil membuat user admin baru: {admin_username}")
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
         db.rollback()
