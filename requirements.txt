@@ -15,6 +15,7 @@ python-dotenv==1.0.1
 # Autentikasi & Keamanan (JWT)
 PyJWT==2.8.0
 pwdlib[bcrypt]==0.2.0
+requests>=2.31.0
 
 # requests sudah termasuk sebagai dependency google-api-core, tidak perlu install ulang
 
