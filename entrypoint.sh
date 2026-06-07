@@ -25,4 +25,5 @@ echo "Menjalankan seed admin..."
 python seed_admin.py
 
 echo "Menjalankan API..."
-exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+exec uvicorn main:app --host 0.0.0.0 --port 8080
+
