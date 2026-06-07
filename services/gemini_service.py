@@ -27,71 +27,37 @@ def _build_prompt(
 DATA: {nama_balita}, {umur_bulan} bln, {jenis_kelamin}, BB {berat_badan}kg, TB {tinggi_badan}cm, {lila_info}, {lk_info}, {imunisasi_info}, {asi_info}, Geo: {kondisi_geografis}, Status: {status_gizi}
 
 ATURAN OUTPUT — WAJIB ikuti dengan ketat:
-1. Output HARUS berupa HTML murni (BUKAN markdown). Jangan gunakan ** atau # atau ```.
-2. Gunakan TEPAT 5 section dengan format HTML di bawah.
-3. Setiap section HARUS singkat: maksimal 2-3 kalimat untuk deskripsi, gunakan <ul><li> untuk poin-poin.
-4. Menu makanan: berikan HANYA 3 contoh menu (pagi/siang/malam) untuk 1 hari, bukan 7 hari. Gunakan bahan lokal sesuai "{kondisi_geografis}".
-5. JANGAN tulis pembukaan, salam, atau penutup. Langsung mulai dari <div>.
-6. Total output MAKSIMAL 350 kata.
+1. Output HARUS berupa Teks / Markdown (BUKAN HTML). Gunakan ** untuk bold, - untuk bullet points.
+2. Setiap bagian HARUS singkat: maksimal 2-3 kalimat untuk deskripsi.
+3. Menu makanan: berikan HANYA 3 contoh menu (pagi/siang/malam) untuk 1 hari, bukan 7 hari. Gunakan bahan lokal sesuai "{kondisi_geografis}".
+4. JANGAN tulis pembukaan, salam, atau penutup. Langsung berikan isinya.
+5. Total output MAKSIMAL 350 kata.
 
-FORMAT HTML YANG HARUS DIIKUTI (copy persis struktur ini):
+FORMAT YANG HARUS DIIKUTI:
 
-<div class="gizi-section">
-<div class="gizi-section-icon">📋</div>
-<div class="gizi-section-body">
-<h4>Analisis Kondisi</h4>
-<p>[2-3 kalimat singkat tentang kondisi dan risiko anak]</p>
-</div>
-</div>
+### 📋 Analisis Kondisi
+[2-3 kalimat singkat tentang kondisi dan risiko anak]
 
-<div class="gizi-section">
-<div class="gizi-section-icon">🍽️</div>
-<div class="gizi-section-body">
-<h4>Contoh Menu Harian</h4>
-<ul>
-<li><strong>Pagi:</strong> [menu]</li>
-<li><strong>Siang:</strong> [menu]</li>
-<li><strong>Malam:</strong> [menu]</li>
-</ul>
-<p class="gizi-note">[1 kalimat tips selingan]</p>
-</div>
-</div>
+### 🍽️ Contoh Menu Harian
+- **Pagi:** [menu]
+- **Siang:** [menu]
+- **Malam:** [menu]
+*Tips:* [1 kalimat tips selingan]
 
-<div class="gizi-section">
-<div class="gizi-section-icon">💊</div>
-<div class="gizi-section-body">
-<h4>Suplemen yang Dianjurkan</h4>
-<ul>
-<li>[suplemen 1]</li>
-<li>[suplemen 2]</li>
-<li>[suplemen 3 jika perlu]</li>
-</ul>
-</div>
-</div>
+### 💊 Suplemen yang Dianjurkan
+- [suplemen 1]
+- [suplemen 2]
+- [suplemen 3 jika perlu]
 
-<div class="gizi-section">
-<div class="gizi-section-icon">💡</div>
-<div class="gizi-section-body">
-<h4>Tips untuk Orang Tua</h4>
-<ul>
-<li>[tip 1 — 1 kalimat]</li>
-<li>[tip 2 — 1 kalimat]</li>
-<li>[tip 3 — 1 kalimat]</li>
-</ul>
-</div>
-</div>
+### 💡 Tips untuk Orang Tua
+- [tip 1 — 1 kalimat]
+- [tip 2 — 1 kalimat]
+- [tip 3 — 1 kalimat]
 
-<div class="gizi-section gizi-section-danger">
-<div class="gizi-section-icon">🚨</div>
-<div class="gizi-section-body">
-<h4>Tanda Bahaya</h4>
-<ul>
-<li>[tanda 1]</li>
-<li>[tanda 2]</li>
-<li>[tanda 3]</li>
-</ul>
-</div>
-</div>
+### 🚨 Tanda Bahaya
+- [tanda 1]
+- [tanda 2]
+- [tanda 3]
 
 Bahasa: Indonesia, hangat tapi ringkas. JANGAN bertele-tele."""
 

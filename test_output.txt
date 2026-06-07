@@ -1,0 +1,56 @@
+<div class="gizi-section">
+<div class="gizi-section-icon">📋</div>
+<div class="gizi-section-body">
+<h4>Analisis Kondisi</h4>
+<p>Budi, 5 tahun, mengalami stunting berat dengan tinggi badan 40 cm, jauh di bawah rata-rata usianya. Kondisi ini berisiko menghambat perkembangan kognitif dan fisik jangka panjang. Intervensi gizi intensif sangat diperlukan untuk mengejar ketertinggalan pertumbuhan.</p>
+</div>
+</div>
+
+<div class="gizi-section">
+<div class="gizi-section-icon">🍽️</div>
+<div class="gizi-section-body">
+<h4>Contoh Menu Harian</h4>
+<ul>
+<li><strong>Pagi:</strong> Bubur nasi dengan ayam cincang, telur puyuh, dan parutan wortel.</li>
+<li><strong>Siang:</strong> Nasi, ikan kembung goreng, tahu atau tempe bacem, sayur bening bayam.</li>
+<li><strong>Malam:</strong> Nasi, ayam suwir, telur orak-arik, tumis buncis.</li>
+</ul>
+<p class="gizi-note">Berikan selingan sehat seperti buah potong (pisang/pepaya) atau biskuit fortifikasi di antara waktu makan utama.</p>
+</div>
+</div>
+
+<div class="gizi-section">
+<div class="gizi-section-icon">💊</div>
+<div class="gizi-section-body">
+<h4>Suplemen yang Dianjurkan</h4>
+<ul>
+<li>Suplemen Vitamin A (sesuai jadwal Posyandu).</li>
+<li>Suplemen Zat Besi (untuk mencegah dan mengatasi anemia).</li>
+<li>Suplemen Zinc (penting untuk pertumbuhan dan daya tahan tubuh).</li>
+</ul>
+</div>
+</div>
+
+<div class="gizi-section">
+<div class="gizi-section-icon">💡</div>
+<div class="gizi-section-body">
+<h4>Tips untuk Orang Tua</h4>
+<ul>
+<li>Berikan makanan porsi kecil namun sering, sekitar 5-6 kali sehari.</li>
+<li>Pastikan setiap hidangan mengandung sumber protein hewani dan nabati yang bervariasi.</li>
+<li>Ciptakan suasana makan yang menyenangkan dan ajak anak makan bersama keluarga.</li>
+</ul>
+</div>
+</div>
+
+<div class="gizi-section gizi-section-danger">
+<div class="gizi-section-icon">🚨</div>
+<div class="gizi-section-body">
+<h4>Tanda Bahaya</h4>
+<ul>
+<li>Penurunan berat badan yang drastis atau tidak ada peningkatan BB.</li>
+<li>Anak tampak sangat lemas, tidak aktif, atau sering sakit.</li>
+<li>Demam tinggi yang tidak turun, disertai muntah atau diare hebat.</li>
+</ul>
+</div>
+</div>
