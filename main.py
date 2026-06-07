@@ -17,7 +17,14 @@ from controllers.intervensi_controller import router as intervensi_router
 from controllers.laporan_controller    import router as laporan_router
 
 # Buat semua tabel saat startup
-Base.metadata.create_all(bind=engine)
+try:
+    print("⏳ Menghubungkan database dan membuat tabel...")
+    Base.metadata.create_all(bind=engine)
+    print("✅ Inisialisasi tabel database selesai.")
+except Exception as db_err:
+    print(f"❌ DATABASE ERROR SAAT STARTUP: {db_err}")
+    import sys
+    sys.exit(1)
 
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
