@@ -58,21 +58,21 @@ def login(form_data: UserAuth, response: Response, db: Session = Depends(get_db)
     access_token  = create_access_token(data={"sub": user.username})
     refresh_token = create_refresh_token(data={"sub": user.username})
     
-    # Set cookies
+    # Set cookies untuk production (cross-origin dari vercel ke railway)
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        samesite="lax",
-        secure=False,  # Ganti ke True jika HTTPS di production
+        samesite="none",
+        secure=True,
         max_age=15 * 60  # 15 menit
     )
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="none",
+        secure=True,
         max_age=7 * 24 * 60 * 60  # 7 hari
     )
     
@@ -116,16 +116,16 @@ def refresh_token(request: Request, response: Response, db: Session = Depends(ge
         key="access_token",
         value=new_access_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="none",
+        secure=True,
         max_age=15 * 60
     )
     response.set_cookie(
         key="refresh_token",
         value=new_refresh_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="none",
+        secure=True,
         max_age=7 * 24 * 60 * 60
     )
     
