@@ -15,8 +15,9 @@ router = APIRouter()
 STATUS_GIZI_BUTUH_INTERVENSI = ["Kurang", "Gizi Buruk", "Stunting", "Wasting"]
 
 
+from database import SessionLocal
+
 async def _process_intervensi_background(
-    db: Session,
     antropometri_id: int,
     balita_nama: str,
     status_gizi: str,
@@ -44,11 +45,16 @@ async def _process_intervensi_background(
         status_imunisasi=status_imunisasi,
         asi_eksklusif=asi_eksklusif,
     )
-    intervensi_data = IntervensiCreate(
-        antropometri_id=antropometri_id,
-        rekomendasi_ai=rekomendasi
-    )
-    intervensi_repository.create_intervensi(db, intervensi_data)
+    
+    db = SessionLocal()
+    try:
+        intervensi_data = IntervensiCreate(
+            antropometri_id=antropometri_id,
+            rekomendasi_ai=rekomendasi
+        )
+        intervensi_repository.create_intervensi(db, intervensi_data)
+    finally:
+        db.close()
 
 
 @router.post("/", response_model=AntropometriResponse, dependencies=[Depends(require_roles(Role.KADER, Role.ADMIN))])
@@ -85,7 +91,6 @@ def create_antropometri(
     if status_gizi in STATUS_GIZI_BUTUH_INTERVENSI:
         background_tasks.add_task(
             _process_intervensi_background,
-            db=db,
             antropometri_id=db_antropometri.id,
             balita_nama=balita.nama,
             status_gizi=status_gizi,

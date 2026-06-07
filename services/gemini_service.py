@@ -1,30 +1,25 @@
+import asyncio
 import google.generativeai as genai
 from database import GEMINI_API_KEY
 from typing import Optional
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-2.5-flash')
 
 
-async def generate_intervensi_resep(
-    nama_balita:      str,
-    status_gizi:      str,
-    berat_badan:      float,
-    tinggi_badan:     float,
-    umur_bulan:       int,
-    jenis_kelamin:    str,
-    kondisi_geografis: Optional[str]   = "Daratan/Umum",
-    lila:             Optional[float]  = None,
-    lingkar_kepala:   Optional[float]  = None,
-    status_imunisasi: Optional[str]    = None,
-    asi_eksklusif:    Optional[bool]   = None,
+def _build_prompt(
+    nama_balita: str,
+    status_gizi: str,
+    berat_badan: float,
+    tinggi_badan: float,
+    umur_bulan: int,
+    jenis_kelamin: str,
+    kondisi_geografis: str,
+    lila_info: str,
+    lk_info: str,
+    imunisasi_info: str,
+    asi_info: str,
 ) -> str:
-    lila_info     = f"LiLA: {lila} cm" if lila else "LiLA: tidak diukur"
-    lk_info       = f"Lingkar Kepala: {lingkar_kepala} cm" if lingkar_kepala else "Lingkar Kepala: tidak diukur"
-    imunisasi_info = f"Status Imunisasi: {status_imunisasi}" if status_imunisasi else "Status Imunisasi: tidak tercatat"
-    asi_info       = f"ASI Eksklusif: {'Ya' if asi_eksklusif else 'Tidak'}" if asi_eksklusif is not None else "ASI Eksklusif: tidak tercatat"
-
-    prompt = f"""
+    return f"""
 Anda adalah Dokter Spesialis Anak di Posyandu. Buatkan rekomendasi gizi RINGKAS untuk balita ini.
 
 DATA: {nama_balita}, {umur_bulan} bln, {jenis_kelamin}, BB {berat_badan}kg, TB {tinggi_badan}cm, {lila_info}, {lk_info}, {imunisasi_info}, {asi_info}, Geo: {kondisi_geografis}, Status: {status_gizi}
@@ -98,9 +93,61 @@ FORMAT HTML YANG HARUS DIIKUTI (copy persis struktur ini):
 
 Bahasa: Indonesia, hangat tapi ringkas. JANGAN bertele-tele.
 """
+
+
+def _call_gemini_sync(prompt: str) -> str:
+    """Memanggil Gemini API secara synchronous untuk menghindari konflik event loop."""
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(prompt)
+    text = response.text
+
+    # Bersihkan markdown wrapper jika ada
+    if text.startswith("```html"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+
+    return text.strip()
+
+
+async def generate_intervensi_resep(
+    nama_balita:      str,
+    status_gizi:      str,
+    berat_badan:      float,
+    tinggi_badan:     float,
+    umur_bulan:       int,
+    jenis_kelamin:    str,
+    kondisi_geografis: Optional[str]   = "Daratan/Umum",
+    lila:             Optional[float]  = None,
+    lingkar_kepala:   Optional[float]  = None,
+    status_imunisasi: Optional[str]    = None,
+    asi_eksklusif:    Optional[bool]   = None,
+) -> str:
+    lila_info      = f"LiLA: {lila} cm" if lila else "LiLA: tidak diukur"
+    lk_info        = f"Lingkar Kepala: {lingkar_kepala} cm" if lingkar_kepala else "Lingkar Kepala: tidak diukur"
+    imunisasi_info = f"Status Imunisasi: {status_imunisasi}" if status_imunisasi else "Status Imunisasi: tidak tercatat"
+    asi_info       = f"ASI Eksklusif: {'Ya' if asi_eksklusif else 'Tidak'}" if asi_eksklusif is not None else "ASI Eksklusif: tidak tercatat"
+
+    prompt = _build_prompt(
+        nama_balita=nama_balita,
+        status_gizi=status_gizi,
+        berat_badan=berat_badan,
+        tinggi_badan=tinggi_badan,
+        umur_bulan=umur_bulan,
+        jenis_kelamin=jenis_kelamin,
+        kondisi_geografis=kondisi_geografis,
+        lila_info=lila_info,
+        lk_info=lk_info,
+        imunisasi_info=imunisasi_info,
+        asi_info=asi_info,
+    )
+
     try:
-        response = await model.generate_content_async(prompt)
-        return response.text
+        # Jalankan di thread terpisah agar tidak memblokir event loop uvicorn
+        result = await asyncio.to_thread(_call_gemini_sync, prompt)
+        return result
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         return "Terjadi kesalahan saat menghubungi layanan AI. Silakan periksa koneksi dan API Key, lalu coba lagi."
