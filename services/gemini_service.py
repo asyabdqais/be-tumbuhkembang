@@ -1,9 +1,12 @@
 import asyncio
-import google.generativeai as genai
+import requests
 from database import GEMINI_API_KEY
 from typing import Optional
 
-genai.configure(api_key=GEMINI_API_KEY)
+GEMINI_API_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-2.5-flash:generateContent"
+)
 
 
 def _build_prompt(
@@ -19,8 +22,7 @@ def _build_prompt(
     imunisasi_info: str,
     asi_info: str,
 ) -> str:
-    return f"""
-Anda adalah Dokter Spesialis Anak di Posyandu. Buatkan rekomendasi gizi RINGKAS untuk balita ini.
+    return f"""Anda adalah Dokter Spesialis Anak di Posyandu. Buatkan rekomendasi gizi RINGKAS untuk balita ini.
 
 DATA: {nama_balita}, {umur_bulan} bln, {jenis_kelamin}, BB {berat_badan}kg, TB {tinggi_badan}cm, {lila_info}, {lk_info}, {imunisasi_info}, {asi_info}, Geo: {kondisi_geografis}, Status: {status_gizi}
 
@@ -91,17 +93,36 @@ FORMAT HTML YANG HARUS DIIKUTI (copy persis struktur ini):
 </div>
 </div>
 
-Bahasa: Indonesia, hangat tapi ringkas. JANGAN bertele-tele.
-"""
+Bahasa: Indonesia, hangat tapi ringkas. JANGAN bertele-tele."""
 
 
-def _call_gemini_sync(prompt: str) -> str:
-    """Memanggil Gemini API secara synchronous untuk menghindari konflik event loop."""
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(prompt)
-    text = response.text
+def _call_gemini_rest(prompt: str) -> str:
+    """
+    Memanggil Gemini API melalui REST HTTP — tidak pakai gRPC sama sekali.
+    Lebih stabil di environment Railway/serverless.
+    """
+    payload = {
+        "contents": [
+            {"parts": [{"text": prompt}]}
+        ],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2048,
+        }
+    }
 
-    # Bersihkan markdown wrapper jika ada
+    response = requests.post(
+        GEMINI_API_URL,
+        params={"key": GEMINI_API_KEY},
+        json=payload,
+        timeout=90,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    text = data["candidates"][0]["content"]["parts"][0]["text"]
+
+    # Bersihkan markdown wrapper jika AI tetap menambahkan ``` 
     if text.startswith("```html"):
         text = text[7:]
     elif text.startswith("```"):
@@ -113,22 +134,23 @@ def _call_gemini_sync(prompt: str) -> str:
 
 
 async def generate_intervensi_resep(
-    nama_balita:      str,
-    status_gizi:      str,
-    berat_badan:      float,
-    tinggi_badan:     float,
-    umur_bulan:       int,
-    jenis_kelamin:    str,
-    kondisi_geografis: Optional[str]   = "Daratan/Umum",
-    lila:             Optional[float]  = None,
-    lingkar_kepala:   Optional[float]  = None,
-    status_imunisasi: Optional[str]    = None,
-    asi_eksklusif:    Optional[bool]   = None,
+    nama_balita:       str,
+    status_gizi:       str,
+    berat_badan:       float,
+    tinggi_badan:      float,
+    umur_bulan:        int,
+    jenis_kelamin:     str,
+    kondisi_geografis: Optional[str]  = "Daratan/Umum",
+    lila:              Optional[float] = None,
+    lingkar_kepala:    Optional[float] = None,
+    status_imunisasi:  Optional[str]  = None,
+    asi_eksklusif:     Optional[bool] = None,
 ) -> str:
-    lila_info      = f"LiLA: {lila} cm" if lila else "LiLA: tidak diukur"
-    lk_info        = f"Lingkar Kepala: {lingkar_kepala} cm" if lingkar_kepala else "Lingkar Kepala: tidak diukur"
-    imunisasi_info = f"Status Imunisasi: {status_imunisasi}" if status_imunisasi else "Status Imunisasi: tidak tercatat"
-    asi_info       = f"ASI Eksklusif: {'Ya' if asi_eksklusif else 'Tidak'}" if asi_eksklusif is not None else "ASI Eksklusif: tidak tercatat"
+    lila_info      = f"LiLA: {lila} cm"                        if lila              else "LiLA: tidak diukur"
+    lk_info        = f"Lingkar Kepala: {lingkar_kepala} cm"    if lingkar_kepala    else "Lingkar Kepala: tidak diukur"
+    imunisasi_info = f"Status Imunisasi: {status_imunisasi}"   if status_imunisasi  else "Status Imunisasi: tidak tercatat"
+    asi_info       = f"ASI Eksklusif: {'Ya' if asi_eksklusif else 'Tidak'}" \
+                     if asi_eksklusif is not None else "ASI Eksklusif: tidak tercatat"
 
     prompt = _build_prompt(
         nama_balita=nama_balita,
@@ -145,9 +167,12 @@ async def generate_intervensi_resep(
     )
 
     try:
-        # Jalankan di thread terpisah agar tidak memblokir event loop uvicorn
-        result = await asyncio.to_thread(_call_gemini_sync, prompt)
+        # Jalankan REST call di thread terpisah agar tidak memblokir event loop
+        result = await asyncio.to_thread(_call_gemini_rest, prompt)
         return result
+    except requests.HTTPError as e:
+        print(f"[Gemini REST] HTTP Error {e.response.status_code}: {e.response.text}")
+        raise
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        print(f"[Gemini REST] Error: {type(e).__name__}: {e}")
         return "Terjadi kesalahan saat menghubungi layanan AI. Silakan periksa koneksi dan API Key, lalu coba lagi."

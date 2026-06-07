@@ -16,8 +16,7 @@ python-dotenv==1.0.1
 PyJWT==2.8.0
 pwdlib[bcrypt]==0.2.0
 
-# Integrasi AI (Google Gemini)
-google-generativeai>=0.8.0
+# requests sudah termasuk sebagai dependency google-api-core, tidak perlu install ulang
 
 # Generator PDF & Template
 weasyprint==61.2
